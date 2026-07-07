@@ -1,428 +1,384 @@
-import { useMemo, useState } from "react";
-
-type Variant = "matrix" | "lookbook" | "blueprint" | "fluid";
+import { useEffect, useState } from "react";
 
 type PingStorePageProps = {
-  variant: Variant;
+  variant?: "lookbook";
 };
 
-const finishes = [
+const menuGroups = [
   {
-    name: "Signal Black",
-    tone: "bg-neutral-950",
-    detail: "black titanium / mirror edge",
+    label: "Identity Layer",
+    links: [
+      ["Profile Tap", "Open contacts, socials, portfolios, and links."],
+      ["Portfolio Relay", "Bridge an in-person meeting to a digital trail."],
+      ["Native NFC", "Works with modern iPhone and Android devices."],
+    ],
   },
   {
-    name: "Raw Titanium",
-    tone: "bg-zinc-300",
-    detail: "brushed silver / 2mm profile",
+    label: "Hardware Layer",
+    links: [
+      ["Titanium Body", "Ultra-lightweight 2.5g build."],
+      ["2mm Profile", "Minimal jewelry form factor."],
+      ["Zero Charge", "No battery ritual for the NFC exchange."],
+    ],
   },
   {
-    name: "Circuit Green",
-    tone: "bg-[#00FF66]",
-    detail: "limited electric accent",
+    label: "Network Layer",
+    links: [
+      ["Relationship Map", "Software for physical interaction context."],
+      ["Follow-Up Loop", "Reduce cold follow-up after live meetings."],
+      ["Organic Distribution", "Every tap becomes a live demonstration."],
+    ],
   },
 ];
 
-const whyNow = [
+const markets = [
   {
-    title: "Real connection is rare again",
-    body: "After years of digital-first interaction and AI-generated noise, people want physical moments that feel human at conferences, coworking spaces, clubs, and campuses.",
+    number: "01",
+    title: "Conferences",
+    copy: "A faster exchange for founder rooms, demo days, tech weeks, and investor conversations.",
   },
   {
-    title: "Business cards are functionally dead",
-    body: "More than 27 billion paper business cards are printed globally every year, and 88% are thrown away within a week. Ping! turns the exchange into a tap that cannot be lost in a pocket.",
+    number: "02",
+    title: "Coworking",
+    copy: "Turn repeated physical proximity into a cleaner digital network.",
   },
   {
-    title: "NFC is already native",
-    body: "Modern iPhone and Android devices read NFC without a scanning app. A single tap can open contacts, socials, portfolios, links, and the digital trail you choose to share.",
+    number: "03",
+    title: "Clubs + Campuses",
+    copy: "Make creative, student, and member communities easier to remember and reconnect with.",
   },
 ];
 
 const specs = [
+  ["2.5g", "Ultra-lightweight titanium"],
+  ["2mm", "Thin physical profile"],
+  ["NFC", "Native iPhone + Android reader"],
+  ["0x", "No charging ritual for the tap"],
+];
+
+const whyUs = [
   {
-    eyebrow: "STRUCTURE",
-    title: "2.5g titanium, built like jewelry.",
-    body: "An ultra-lightweight titanium smart ring with a thin 2mm profile, designed for identity and connection rather than health tracking.",
-    stat: "2.5g",
+    title: "Presence",
+    copy: "Ping! starts from the physical moment, not another cold digital request.",
   },
   {
-    eyebrow: "POWER",
-    title: "Zero-charging footprint.",
-    body: "Ping! uses built-in NFC, so the everyday exchange feels instant and native with no battery ritual added to your life.",
-    stat: "0x",
+    title: "Clarity",
+    copy: "One tap opens the identity, links, portfolio, and contact details you choose to share.",
   },
   {
-    eyebrow: "REACH",
-    title: "Every tap is a live product demo.",
-    body: "Early cohorts scaled beyond 270 active rings, with each in-person tap showing the product to someone new in the wild.",
-    stat: "270+",
+    title: "Momentum",
+    copy: "Every customer interaction creates a visible product demo for the next person in the room.",
   },
 ];
 
 const team = [
   {
     name: "Vaness “Reece” Gardner",
-    role: "Founder & CEO",
-    body: "Former AI specialist at Babson College and Babson alum. Founded The Generator, an AI lab that grew past 1,000 members across the Boston technology landscape, including MIT, Harvard, researchers, venture partners, students, and local business owners.",
-    focus: "Strategic vision, wearable design, supply chain logistics, institutional sales, ecosystem relationships.",
+    title: "Founder & CEO",
+    copy: "Former AI specialist at Babson College and Babson alum. Founded The Generator, Babson's AI lab drawing 1,000+ members from MIT, Harvard, venture partners, students, researchers, and SMB owners.",
   },
   {
     name: "Gaspard Seuge",
-    role: "Co-Founder & CPO",
-    body: "HEC Paris educated product architect. Former Growth at MWM AI and AI Engineer at Sorare, the multi-billion-dollar fantasy sports web3 platform. Built the Ping! web and iOS apps and helped drive 300K+ organic impressions.",
-    focus: "Software product, brand systems, UX, mobile and web applications, go-to-market strategy.",
+    title: "Co-Founder & CPO",
+    copy: "HEC Paris educated product architect. Former Growth at MWM AI and AI Engineer at Sorare. Built the Ping! web and iOS applications and helped drive 300K+ organic impressions.",
   },
 ];
 
-const variants = {
-  matrix: {
-    label: "The Cinematic Matrix",
-    bg: "bg-black",
-    page: "font-sans tracking-tight",
-    nav: "border-[#00FF66]/35 bg-black/85 text-white",
-    heroGrid: "border-[#00FF66]/40",
-    media: "border-[#00FF66]/40 bg-black",
-    panel: "border-[#00FF66]/50 bg-black",
-    title: "text-5xl font-black uppercase leading-[0.86] text-white md:text-7xl lg:text-8xl",
-    subtitle: "text-lg font-semibold uppercase text-white md:text-xl",
-    copy: "text-sm leading-6 text-zinc-400",
-    accent: "text-[#00FF66]",
-    button: "border border-[#00FF66] bg-[#00FF66] px-6 py-4 text-sm font-black uppercase tracking-[0.24em] text-black transition hover:bg-black hover:text-[#00FF66]",
-    secondaryButton: "border border-[#00FF66]/60 px-5 py-4 text-xs font-bold uppercase tracking-[0.22em] text-[#00FF66]",
-    section: "border-t border-[#00FF66]/35",
-    card: "border border-[#00FF66]/35 bg-black",
-    serif: "",
-    mono: "font-mono",
-    round: "rounded-none",
-    ringGlow: "shadow-[0_0_70px_rgba(0,255,102,0.24)]",
-  },
-  lookbook: {
-    label: "The High-End Technical Lookbook",
-    bg: "bg-black",
-    page: "font-sans tracking-tight",
-    nav: "border-white/10 bg-black/75 text-white",
-    heroGrid: "border-white/10",
-    media: "border-white/10 bg-black",
-    panel: "border-white/10 bg-black",
-    title: "font-serif text-5xl leading-[0.95] text-white md:text-7xl lg:text-8xl",
-    subtitle: "font-serif text-2xl leading-tight text-white md:text-4xl",
-    copy: "text-sm leading-7 text-zinc-400",
-    accent: "text-[#00C853]",
-    button: "border border-white bg-white px-6 py-4 text-xs font-semibold uppercase tracking-[0.24em] text-black transition hover:border-[#00C853] hover:bg-[#00C853]",
-    secondaryButton: "px-0 py-4 text-xs uppercase tracking-[0.24em] text-[#00C853]",
-    section: "border-t border-white/10",
-    card: "border-0 bg-transparent",
-    serif: "font-serif",
-    mono: "font-mono",
-    round: "rounded-none",
-    ringGlow: "",
-  },
-  blueprint: {
-    label: "The Functional Blueprint Grid",
-    bg: "bg-black",
-    page: "font-mono tracking-tight",
-    nav: "border-[#00FF66]/45 bg-black text-white",
-    heroGrid: "border-[#00FF66]/45",
-    media: "border-[#00FF66]/45 bg-black",
-    panel: "border-[#00FF66]/45 bg-black",
-    title: "text-4xl font-bold uppercase leading-[0.92] text-white md:text-6xl lg:text-7xl",
-    subtitle: "text-lg font-bold uppercase text-white md:text-2xl",
-    copy: "text-xs leading-6 text-zinc-400",
-    accent: "text-[#00FF66]",
-    button: "border border-[#00FF66] bg-[#00FF66] px-6 py-4 text-xs font-bold uppercase tracking-[0.18em] text-black transition hover:bg-black hover:text-[#00FF66]",
-    secondaryButton: "border border-zinc-700 px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-white",
-    section: "border-t border-[#00FF66]/45",
-    card: "border border-zinc-700 bg-black",
-    serif: "",
-    mono: "font-mono",
-    round: "rounded-none",
-    ringGlow: "shadow-[0_0_0_1px_rgba(0,255,102,0.5)]",
-  },
-  fluid: {
-    label: "The Fluid Motion Darkmode",
-    bg: "bg-black",
-    page: "font-sans tracking-tight",
-    nav: "border-white/10 bg-black/75 text-white backdrop-blur-xl",
-    heroGrid: "border-white/10",
-    media: "border-white/10 bg-zinc-950/70",
-    panel: "border-white/10 bg-zinc-950/65 backdrop-blur-xl",
-    title: "text-5xl font-semibold leading-[0.92] text-white md:text-7xl lg:text-8xl",
-    subtitle: "text-xl font-medium leading-tight text-zinc-100 md:text-3xl",
-    copy: "text-sm leading-7 text-zinc-400",
-    accent: "text-[#00FF66]",
-    button: "rounded-full bg-[#00FF66] px-7 py-4 text-sm font-bold text-black transition hover:scale-[1.02] hover:bg-white",
-    secondaryButton: "rounded-full border border-white/15 px-5 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-white",
-    section: "border-t border-white/10",
-    card: "rounded-[2rem] border border-white/10 bg-white/[0.03] backdrop-blur",
-    serif: "",
-    mono: "font-mono",
-    round: "rounded-[2rem]",
-    ringGlow: "shadow-[0_0_100px_rgba(0,255,102,0.2)]",
-  },
-} satisfies Record<Variant, Record<string, string>>;
+function useReveal() {
+  useEffect(() => {
+    const elements = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.setAttribute("data-visible", "true");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.18 },
+    );
 
-function RingVisual({
-  variant,
-  tone,
-  label,
-  large = false,
-}: {
-  variant: Variant;
-  tone: string;
-  label: string;
-  large?: boolean;
-}) {
-  const v = variants[variant];
-  const isFluid = variant === "fluid";
-  const isBlueprint = variant === "blueprint";
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
+}
+
+function ProtocolLoader() {
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLoaded(true), 950);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   return (
-    <div className={`relative isolate flex min-h-[22rem] items-center justify-center overflow-hidden ${v.media} ${v.round}`}>
-      {isFluid ? (
-        <div className="absolute inset-8 rounded-full bg-[radial-gradient(circle_at_45%_42%,rgba(0,255,102,0.36),transparent_44%),radial-gradient(circle_at_60%_70%,rgba(0,200,83,0.22),transparent_42%)] blur-2xl" />
-      ) : null}
-      {isBlueprint ? (
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,102,.12)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,102,.12)_1px,transparent_1px)] bg-[size:34px_34px]" />
-      ) : null}
-      <div
-        className={`relative aspect-square ${large ? "w-56 md:w-72" : "w-44 md:w-56"} rounded-full border-[18px] md:border-[24px] ${tone} border-current text-zinc-200 ${v.ringGlow}`}
-      >
-        <div className="absolute inset-[22%] rounded-full bg-black" />
-        <div className="absolute left-1/2 top-[-16%] h-10 w-[2px] -translate-x-1/2 bg-[#00FF66]" />
-        <div className="absolute bottom-[-2.75rem] left-1/2 -translate-x-1/2 whitespace-nowrap text-center">
-          <p className={`text-[10px] uppercase tracking-[0.28em] ${v.accent}`}>{label}</p>
+    <div
+      className={`fixed inset-0 z-[80] grid place-items-center bg-[#080806] text-[#e9e1cf] transition duration-700 ${
+        loaded ? "pointer-events-none opacity-0" : "opacity-100"
+      }`}
+    >
+      <div className="w-full max-w-xl px-8">
+        <p className="text-xs uppercase tracking-[0.42em] text-[#c8ff5f]">Loading protocols</p>
+        <div className="mt-6 h-px overflow-hidden bg-[#e9e1cf]/15">
+          <div className="h-full w-2/3 animate-[ping-load_950ms_ease-in-out_infinite] bg-[#c8ff5f]" />
+        </div>
+        <div className="mt-6 flex items-center justify-between text-xs uppercase tracking-[0.22em] text-[#e9e1cf]/45">
+          <span>Loading Ping</span>
+          <span>cc 2026</span>
         </div>
       </div>
     </div>
   );
 }
 
-export function PingStorePage({ variant }: PingStorePageProps) {
-  const [finish, setFinish] = useState(finishes[0]);
-  const [openWhy, setOpenWhy] = useState(0);
-  const [activeSpec, setActiveSpec] = useState(0);
-  const v = variants[variant];
-
-  const heroTagline = useMemo(() => {
-    if (variant === "lookbook") return "A titanium object for the return of real-world identity.";
-    if (variant === "blueprint") return "[OBJECT: NFC IDENTITY RING] engineered for physical-to-digital connection.";
-    if (variant === "fluid") return "Tap into the person in front of you, then carry the connection forward.";
-    return "The NFC identity ring for a world tired of cold digital noise.";
-  }, [variant]);
-
+function DropdownPanel() {
   return (
-    <main className={`${v.bg} ${v.page} min-h-screen text-white`}>
-      <header className={`sticky top-0 z-50 flex items-center justify-between border-b px-5 py-4 md:px-8 ${v.nav}`}>
-        <a href="#top" className="text-sm font-bold uppercase tracking-[0.28em]">
-          Ping!
-        </a>
-        <nav className="hidden items-center gap-8 text-[11px] uppercase tracking-[0.24em] text-zinc-400 md:flex">
-          <a className="transition hover:text-[#00FF66]" href="#why">Why now</a>
-          <a className="transition hover:text-[#00FF66]" href="#specs">Specs</a>
-          <a className="transition hover:text-[#00FF66]" href="#team">Team</a>
-        </nav>
-        <a className={variant === "fluid" ? "rounded-full bg-white px-4 py-2 text-xs font-bold text-black" : `text-xs uppercase tracking-[0.22em] ${v.accent}`} href="#buy">
-          Get Ping!
-        </a>
-      </header>
-
-      <section id="top" className={`grid min-h-screen border-b lg:grid-cols-[minmax(0,1.12fr)_minmax(25rem,0.88fr)] ${v.heroGrid}`}>
-        <div className="grid gap-px bg-white/10 p-px lg:grid-cols-2">
-          <div className="lg:col-span-2">
-            <RingVisual variant={variant} tone={finish.tone} label={finish.name} large />
-          </div>
-          {finishes.map((item) => (
-            <button
-              key={item.name}
-              className="text-left"
-              onClick={() => setFinish(item)}
-              type="button"
-            >
-              <RingVisual variant={variant} tone={item.tone} label={item.name} />
-            </button>
+    <div className="group relative hidden lg:block">
+      <button className="text-xs uppercase tracking-[0.18em] text-[#e9e1cf]/70 transition group-hover:text-[#e9e1cf]">
+        What Ping does ▾
+      </button>
+      <div className="pointer-events-none absolute left-1/2 top-full z-40 mt-6 w-[48rem] -translate-x-1/2 border border-[#e9e1cf]/10 bg-[#0d0d09]/95 p-6 opacity-0 shadow-2xl backdrop-blur-xl transition duration-300 group-hover:pointer-events-auto group-hover:opacity-100">
+        <div className="grid gap-6 md:grid-cols-3">
+          {menuGroups.map((group) => (
+            <div key={group.label}>
+              <p className="mb-4 text-xs uppercase tracking-[0.24em] text-[#c8ff5f]">{group.label}</p>
+              <div className="space-y-3">
+                {group.links.map(([title, copy]) => (
+                  <a className="block border-t border-[#e9e1cf]/10 pt-3" href="#markets" key={title}>
+                    <span className="block text-sm text-[#e9e1cf]">□ {title}</span>
+                    <span className="mt-1 block text-xs leading-5 text-[#e9e1cf]/45">{copy}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
 
-        <aside className={`lg:sticky lg:top-[57px] lg:h-[calc(100vh-57px)] ${v.panel}`} id="buy">
-          <div className="flex h-full flex-col justify-between gap-10 p-6 md:p-10">
-            <div>
-              <div className={`mb-8 flex items-center justify-between border-b pb-5 ${variant === "matrix" || variant === "blueprint" ? "border-[#00FF66]/35" : "border-white/10"}`}>
-                <span className={`text-[11px] uppercase tracking-[0.28em] ${v.accent}`}>{v.label}</span>
-                <span className={`text-[11px] uppercase tracking-[0.28em] ${variant === "blueprint" ? "text-[#00FF66]" : "text-zinc-500"}`}>NFC / 2.5g</span>
-              </div>
-              <p className={`mb-3 text-sm uppercase tracking-[0.3em] ${v.accent}`}>Ping! by Ping Ring Inc.</p>
-              <h1 className={v.title}>Ping!</h1>
-              <p className={`mt-7 max-w-xl ${v.subtitle}`}>{heroTagline}</p>
-              <p className={`mt-5 max-w-xl ${v.copy}`}>
-                A smart ring designed purely for identity, portfolios, and bridging in-person connection to your digital trail. It is not a health tracker.
+function Noise() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 z-0 opacity-[0.06] [background-image:linear-gradient(115deg,transparent_0%,rgba(255,255,255,.7)_50%,transparent_100%)] [background-size:3px_3px]"
+    />
+  );
+}
+
+export function PingStorePage(_: PingStorePageProps) {
+  useReveal();
+
+  return (
+    <main className="relative min-h-screen overflow-x-hidden bg-[#080806] font-sans text-[#e9e1cf] selection:bg-[#c8ff5f] selection:text-black">
+      <ProtocolLoader />
+      <Noise />
+      <style>{`
+        @keyframes ping-load { 0% { transform: translateX(-110%); } 100% { transform: translateX(170%); } }
+        [data-reveal] { opacity: 0; transform: translateY(42px); transition: opacity 800ms ease, transform 800ms ease; }
+        [data-reveal][data-visible="true"] { opacity: 1; transform: translateY(0); }
+        @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+      `}</style>
+
+      <header className="sticky top-0 z-50 border-b border-[#e9e1cf]/10 bg-[#080806]/88 px-5 backdrop-blur-xl md:px-8">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-6">
+          <a className="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.16em]" href="#home">
+            <span className="grid h-5 w-5 place-items-center border border-[#c8ff5f]/70 text-[10px] text-[#c8ff5f]">P</span>
+            Ping
+          </a>
+          <nav className="hidden items-center gap-9 lg:flex">
+            <a className="text-xs uppercase tracking-[0.18em] text-[#e9e1cf]/70 transition hover:text-[#e9e1cf]" href="#home">Home</a>
+            <DropdownPanel />
+            <a className="text-xs uppercase tracking-[0.18em] text-[#e9e1cf]/70 transition hover:text-[#e9e1cf]" href="#markets">Markets</a>
+            <a className="text-xs uppercase tracking-[0.18em] text-[#e9e1cf]/70 transition hover:text-[#e9e1cf]" href="#team">About</a>
+          </nav>
+          <a
+            className="border border-[#e9e1cf]/20 px-4 py-2 text-xs uppercase tracking-[0.18em] text-[#e9e1cf] transition hover:border-[#c8ff5f] hover:text-[#c8ff5f]"
+            href="mailto:hello@getping.today?subject=Get%20Ping!"
+          >
+            Let's connect →
+          </a>
+        </div>
+      </header>
+
+      <section id="home" className="relative z-10 grid min-h-[calc(100svh-80px)] scroll-mt-20 px-5 py-12 md:px-8">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(200,255,95,.16),transparent_24rem),radial-gradient(circle_at_82%_70%,rgba(200,255,95,.12),transparent_22rem)]" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[46rem] w-[46rem] -translate-x-1/2 -translate-y-1/2 border border-[#e9e1cf]/5" />
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 lg:grid-cols-[5rem_1fr_18rem]">
+          <div className="hidden flex-col justify-end gap-4 pb-16 text-xs text-[#e9e1cf]/45 lg:flex">
+            {["01", "02", "03", "04", "05"].map((item) => (
+              <a className="transition hover:text-[#c8ff5f]" href="#markets" key={item}>{item}</a>
+            ))}
+            <span className="text-[#c8ff5f]">#</span>
+          </div>
+
+          <div className="flex min-h-[34rem] flex-col justify-center py-12 lg:min-h-[calc(100svh-80px)]">
+            <p data-reveal className="text-sm uppercase tracking-[0.36em] text-[#c8ff5f]">Physical identity layer</p>
+            <h1 data-reveal className="mt-8 max-w-5xl text-[clamp(4.5rem,12vw,12rem)] font-semibold uppercase leading-[0.78] tracking-[-0.08em] text-[#e9e1cf]">
+              Tap.
+              <br />
+              Connect.
+              <br />
+              Remember.
+            </h1>
+            <div data-reveal className="mt-10 grid max-w-4xl gap-6 border-t border-[#e9e1cf]/10 pt-7 md:grid-cols-[1fr_.75fr]">
+              <p className="text-2xl leading-tight tracking-[-0.04em] text-[#e9e1cf] md:text-4xl">
+                NFC identity hardware for real-world connection.
+              </p>
+              <p className="text-sm leading-7 text-[#e9e1cf]/55">
+                Ping! is a titanium smart ring for identity, portfolios, and links. It is not a health tracker; it is a live bridge from the room to your digital trail.
               </p>
             </div>
-
-            <div className="space-y-8">
-              <div>
-                <div className="mb-4 flex items-center justify-between">
-                  <p className={`text-xs uppercase tracking-[0.24em] ${v.accent}`}>Select finish</p>
-                  <p className="text-xs text-zinc-500">{finish.detail}</p>
-                </div>
-                <div className="grid gap-3">
-                  {finishes.map((item) => (
-                    <button
-                      className={`flex items-center justify-between border px-4 py-4 text-left transition ${
-                        finish.name === item.name
-                          ? "border-[#00FF66] text-white"
-                          : "border-white/12 text-zinc-400 hover:border-[#00FF66]/60 hover:text-white"
-                      } ${variant === "fluid" ? "rounded-full" : "rounded-none"}`}
-                      key={item.name}
-                      onClick={() => setFinish(item)}
-                      type="button"
-                    >
-                      <span className="text-sm font-semibold">{item.name}</span>
-                      <span className={`h-4 w-4 rounded-full border border-white/30 ${item.tone}`} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className={`grid grid-cols-3 border text-center ${variant === "matrix" || variant === "blueprint" ? "border-[#00FF66]/35" : "border-white/10"} ${variant === "fluid" ? "rounded-[1.5rem] overflow-hidden" : ""}`}>
-                {["2.5g titanium", "native NFC", "no scan app"].map((item) => (
-                  <div className="border-r border-inherit px-3 py-4 last:border-r-0" key={item}>
-                    <p className={`text-[10px] uppercase tracking-[0.18em] ${variant === "blueprint" ? "text-[#00FF66]" : "text-zinc-400"}`}>{item}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <a className={`${v.button} text-center`} href="mailto:hello@getping.today?subject=Get%20Ping!">
-                  Get Ping!
-                </a>
-                <a className={`${v.secondaryButton} text-center`} href="#why">
-                  Why now
-                </a>
-              </div>
+            <div data-reveal className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <a className="border border-[#c8ff5f] px-6 py-3 text-xs uppercase tracking-[0.22em] text-[#c8ff5f] transition hover:bg-[#c8ff5f] hover:text-[#080806]" href="mailto:hello@getping.today?subject=Get%20Ping!">
+                Partnerships
+              </a>
+              <a className="border border-[#e9e1cf]/15 px-6 py-3 text-xs uppercase tracking-[0.22em] text-[#e9e1cf]/70 transition hover:border-[#e9e1cf] hover:text-[#e9e1cf]" href="#markets">
+                Learn more
+              </a>
             </div>
           </div>
-        </aside>
-      </section>
 
-      <section id="why" className={`px-5 py-20 md:px-8 lg:py-28 ${v.section}`}>
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.72fr_1fr]">
-          <div>
-            <p className={`mb-4 text-xs uppercase tracking-[0.28em] ${v.accent}`}>Why now</p>
-            <h2 className={variant === "lookbook" ? `${v.serif} text-5xl leading-tight md:text-7xl` : "text-4xl font-bold uppercase leading-tight md:text-6xl"}>
-              The moment for a physical digital identity key.
-            </h2>
-          </div>
-          <div className={`divide-y ${variant === "matrix" || variant === "blueprint" ? "divide-[#00FF66]/35" : "divide-white/10"}`}>
-            {whyNow.map((item, index) => (
-              <div key={item.title}>
-                <button
-                  className="flex w-full items-center justify-between gap-6 py-7 text-left"
-                  onClick={() => setOpenWhy(openWhy === index ? -1 : index)}
-                  type="button"
-                >
-                  <span className="text-xl font-semibold text-white md:text-2xl">{item.title}</span>
-                  <span className={`text-3xl leading-none ${v.accent}`}>{openWhy === index ? "-" : "+"}</span>
-                </button>
-                <div className={`grid transition-all duration-500 ${openWhy === index ? "grid-rows-[1fr] pb-8" : "grid-rows-[0fr]"}`}>
-                  <div className="overflow-hidden">
-                    <p className={`max-w-3xl ${v.copy}`}>{item.body}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="hidden items-end pb-16 text-xs uppercase tracking-[0.24em] text-[#e9e1cf]/45 lg:flex">
+            Scroll to learn more...
           </div>
         </div>
       </section>
 
-      <section id="specs" className={`min-h-screen px-5 py-20 md:px-8 lg:py-28 ${v.section}`}>
+      <section className="relative z-10 border-y border-[#e9e1cf]/10 px-5 py-24 md:px-8 lg:py-32">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.72fr_1fr]">
+          <div data-reveal>
+            <p className="text-xs uppercase tracking-[0.3em] text-[#c8ff5f]">About Ping</p>
+            <h2 className="mt-5 text-5xl font-semibold uppercase leading-[0.88] tracking-[-0.06em] text-[#e9e1cf] md:text-7xl">
+              Real-world identity for the AI era.
+            </h2>
+          </div>
+          <div data-reveal className="space-y-7 text-base leading-8 text-[#e9e1cf]/58">
+            <p>
+              Ping! bridges the physical world and a user's digital trail through a combined hardware and software experience. A single tap transfers a chosen profile: contacts, socials, portfolios, and links.
+            </p>
+            <p>
+              The product was born from creative text-to-image-to-3D AI workflows and built because traditional business cards are dead, while digital interactions feel less human.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="markets" className="relative z-10 scroll-mt-20 px-5 py-24 md:px-8 lg:py-32">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div data-reveal className="mb-14 grid gap-8 lg:grid-cols-[.7fr_1fr]">
             <div>
-              <p className={`mb-4 text-xs uppercase tracking-[0.28em] ${v.accent}`}>Macro specification carousel</p>
-              <h2 className={variant === "lookbook" ? `${v.serif} text-5xl leading-tight md:text-7xl` : "text-4xl font-bold uppercase leading-tight md:text-6xl"}>
-                Hardware with nothing extra.
+              <p className="text-xs uppercase tracking-[0.3em] text-[#c8ff5f]">Markets we operate in</p>
+              <h2 className="mt-5 text-5xl font-semibold uppercase leading-[0.88] tracking-[-0.06em] md:text-7xl">
+                Built for rooms where follow-up matters.
               </h2>
             </div>
-            <div className="flex gap-2">
-              {specs.map((item, index) => (
-                <button
-                  aria-label={`Show ${item.eyebrow}`}
-                  className={`h-2.5 w-10 transition ${activeSpec === index ? "bg-[#00FF66]" : "bg-white/20"}`}
-                  key={item.eyebrow}
-                  onClick={() => setActiveSpec(index)}
-                  type="button"
-                />
-              ))}
-            </div>
+            <p className="max-w-2xl self-end text-sm leading-7 text-[#e9e1cf]/55">
+              Ping! is for high-density human networks: events, campuses, coworking spaces, clubs, and founder ecosystems where a connection should survive the moment.
+            </p>
           </div>
 
-          <div className={`grid min-h-[34rem] overflow-hidden ${v.card} ${variant === "fluid" ? "lg:grid-cols-[0.9fr_1.1fr]" : "lg:grid-cols-2"}`}>
-            <div className="relative flex items-center justify-center overflow-hidden border-b border-white/10 p-8 lg:border-b-0 lg:border-r">
-              {variant === "fluid" ? <div className="absolute h-96 w-96 rounded-full bg-[#00FF66]/20 blur-3xl" /> : null}
-              {variant === "blueprint" ? <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] bg-[size:50px_50px]" /> : null}
-              <div className={`relative flex aspect-square w-64 items-center justify-center rounded-full border ${variant === "fluid" ? "border-[#00FF66]/35 bg-black/60" : "border-[#00FF66]/60"}`}>
-                <span className={`${v.accent} ${variant === "lookbook" ? "font-serif text-8xl" : "text-7xl font-black"}`}>{specs[activeSpec].stat}</span>
-              </div>
-            </div>
-            <div className="flex flex-col justify-between p-8 md:p-12">
-              <div>
-                <p className={`mb-6 text-xs uppercase tracking-[0.28em] ${v.accent}`}>
-                  {variant === "blueprint" ? `[STATUS: ${specs[activeSpec].eyebrow}]` : specs[activeSpec].eyebrow}
-                </p>
-                <h3 className={variant === "lookbook" ? `${v.serif} text-5xl leading-tight text-white md:text-7xl` : "text-4xl font-bold uppercase leading-tight text-white md:text-6xl"}>
-                  {specs[activeSpec].title}
-                </h3>
-                <p className={`mt-8 max-w-xl ${v.copy}`}>{specs[activeSpec].body}</p>
-              </div>
-              <div className="mt-12 grid gap-3 md:grid-cols-3">
-                {specs.map((item, index) => (
-                  <button
-                    className={`border p-4 text-left transition ${activeSpec === index ? "border-[#00FF66] text-white" : "border-white/10 text-zinc-500 hover:text-white"}`}
-                    key={item.eyebrow}
-                    onClick={() => setActiveSpec(index)}
-                    type="button"
-                  >
-                    <p className={`text-[10px] uppercase tracking-[0.2em] ${activeSpec === index ? v.accent : ""}`}>{item.eyebrow}</p>
-                    <p className="mt-2 text-sm">{item.title}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="team" className={`px-5 py-20 md:px-8 lg:py-28 ${v.section}`}>
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-12 max-w-3xl">
-            <p className={`mb-4 text-xs uppercase tracking-[0.28em] ${v.accent}`}>Creator / team pedigree</p>
-            <h2 className={variant === "lookbook" ? `${v.serif} text-5xl leading-tight md:text-7xl` : "text-4xl font-bold uppercase leading-tight md:text-6xl"}>
-              Built by AI-native product operators.
-            </h2>
-          </div>
-          <div className={`grid ${variant === "lookbook" ? "gap-12 lg:grid-cols-2" : "gap-px bg-white/10 lg:grid-cols-2"}`}>
-            {team.map((person) => (
-              <article className={`${variant === "lookbook" ? "border-t border-white/10 pt-8" : `${v.card} p-8 md:p-10`}`} key={person.name}>
-                <p className={`mb-5 text-xs uppercase tracking-[0.28em] ${v.accent}`}>{person.role}</p>
-                <h3 className={variant === "lookbook" ? `${v.serif} text-4xl leading-tight text-white md:text-6xl` : "text-3xl font-bold uppercase leading-tight text-white md:text-5xl"}>
-                  {person.name}
-                </h3>
-                <p className={`mt-7 ${v.copy}`}>{person.body}</p>
-                <div className={`mt-8 border-t pt-6 ${variant === "matrix" || variant === "blueprint" ? "border-[#00FF66]/35" : "border-white/10"}`}>
-                  <p className={`mb-2 text-[10px] uppercase tracking-[0.24em] ${v.accent}`}>Focus</p>
-                  <p className="text-sm leading-6 text-zinc-300">{person.focus}</p>
-                </div>
+          <div className="grid border-y border-[#e9e1cf]/10 md:grid-cols-3">
+            {markets.map((market) => (
+              <article data-reveal className="border-b border-[#e9e1cf]/10 py-8 md:border-b-0 md:border-r md:px-7 md:last:border-r-0" key={market.number}>
+                <p className="text-sm uppercase tracking-[0.24em] text-[#c8ff5f]">[ {market.number} ]</p>
+                <h3 className="mt-8 text-3xl font-semibold uppercase tracking-[-0.04em]">{market.title}</h3>
+                <p className="mt-5 text-sm leading-7 text-[#e9e1cf]/52">{market.copy}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <footer className={`px-5 py-10 md:px-8 ${v.section}`}>
-        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 text-xs uppercase tracking-[0.22em] text-zinc-500 md:flex-row">
-          <p>Ping! by Ping Ring Inc.</p>
-          <p>Identity. Portfolios. Real-world connection.</p>
+      <section id="hardware" className="relative z-10 overflow-hidden border-y border-[#e9e1cf]/10 py-20">
+        <div className="flex w-[200%] animate-[ticker_24s_linear_infinite] gap-10 whitespace-nowrap text-[clamp(3rem,9vw,9rem)] font-semibold uppercase leading-none tracking-[-0.08em] text-[#e9e1cf]/12">
+          {Array.from({ length: 2 }).map((_, index) => (
+            <div className="flex gap-10" key={index}>
+              <span>2.5g titanium</span>
+              <span>native NFC</span>
+              <span>zero charging footprint</span>
+              <span>not a health tracker</span>
+            </div>
+          ))}
+        </div>
+        <div className="mx-auto mt-16 grid max-w-7xl gap-10 px-5 md:px-8 lg:grid-cols-[.8fr_1.2fr]">
+          <div data-reveal className="border border-[#e9e1cf]/10 p-8">
+            <p className="text-xs uppercase tracking-[0.3em] text-[#c8ff5f]">Technical profile</p>
+            <p className="mt-10 text-7xl font-semibold uppercase leading-none tracking-[-0.08em] text-[#e9e1cf] md:text-8xl">
+              {specs[activeSpec][0]}
+            </p>
+            <p className="mt-6 text-sm leading-7 text-[#e9e1cf]/55">{specs[activeSpec][1]}</p>
+          </div>
+          <div className="grid gap-3">
+            {specs.map(([value, copy], index) => (
+              <button
+                className={`grid gap-5 border p-6 text-left transition md:grid-cols-[8rem_1fr] ${
+                  activeSpec === index ? "border-[#c8ff5f] bg-[#c8ff5f]/5" : "border-[#e9e1cf]/10 hover:border-[#e9e1cf]/30"
+                }`}
+                key={value}
+                onClick={() => setActiveSpec(index)}
+                type="button"
+              >
+                <span className="text-xl font-semibold uppercase tracking-[-0.04em] text-[#c8ff5f]">{value}</span>
+                <span className="text-sm leading-6 text-[#e9e1cf]/55">{copy}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative z-10 px-5 py-24 md:px-8 lg:py-32">
+        <div className="mx-auto max-w-7xl">
+          <div data-reveal className="mb-14">
+            <p className="text-xs uppercase tracking-[0.3em] text-[#c8ff5f]">Why Ping?</p>
+            <h2 className="mt-5 max-w-4xl text-5xl font-semibold uppercase leading-[0.88] tracking-[-0.06em] md:text-7xl">
+              Powering the next layer of personal exchange.
+            </h2>
+          </div>
+          <div className="grid gap-px bg-[#e9e1cf]/10 md:grid-cols-3">
+            {whyUs.map((item) => (
+              <article data-reveal className="bg-[#080806] p-8" key={item.title}>
+                <h3 className="text-3xl font-semibold uppercase tracking-[-0.04em]">{item.title}</h3>
+                <p className="mt-6 text-sm leading-7 text-[#e9e1cf]/55">{item.copy}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="team" className="relative z-10 scroll-mt-20 border-y border-[#e9e1cf]/10 px-5 py-24 md:px-8 lg:py-32">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.75fr_1.25fr]">
+          <div data-reveal>
+            <p className="text-xs uppercase tracking-[0.3em] text-[#c8ff5f]">Working at Ping</p>
+            <h2 className="mt-5 text-5xl font-semibold uppercase leading-[0.88] tracking-[-0.06em] md:text-7xl">
+              AI-native founders. Physical product operators.
+            </h2>
+          </div>
+          <div className="grid gap-px bg-[#e9e1cf]/10">
+            {team.map((person) => (
+              <article data-reveal className="bg-[#080806] p-8 md:p-10" key={person.name}>
+                <p className="text-xs uppercase tracking-[0.3em] text-[#c8ff5f]">{person.title}</p>
+                <h3 className="mt-5 text-4xl font-semibold uppercase leading-none tracking-[-0.05em] md:text-5xl">{person.name}</h3>
+                <p className="mt-7 text-sm leading-7 text-[#e9e1cf]/55">{person.copy}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <footer className="relative z-10 px-5 py-12 md:px-8">
+        <div className="mx-auto grid max-w-7xl gap-8 border-t border-[#e9e1cf]/10 pt-10 md:grid-cols-[1fr_auto]">
+          <p className="max-w-2xl text-sm leading-7 text-[#e9e1cf]/50">
+            Ping! enhances real-world identity exchange through NFC-enabled titanium hardware and software designed for follow-up, portfolios, and relationship context.
+          </p>
+          <div className="text-xs uppercase tracking-[0.24em] text-[#e9e1cf]/45">
+            <p>© Ping Ring Inc.</p>
+            <a className="mt-3 block text-[#c8ff5f]" href="mailto:hello@getping.today?subject=Get%20Ping!">
+              Contact →
+            </a>
+          </div>
         </div>
       </footer>
     </main>
