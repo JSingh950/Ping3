@@ -170,6 +170,7 @@ function Noise() {
 
 export function PingStorePage(_: PingStorePageProps) {
   useReveal();
+  const [activeSpec, setActiveSpec] = useState(0);
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-[#080806] font-sans text-[#e9e1cf] selection:bg-[#c8ff5f] selection:text-black">
